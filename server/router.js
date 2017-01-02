@@ -10,6 +10,9 @@ const app = express.Router();
 let SiteController = require('./controllers/site');
 let APIController = require('./controllers/api');
 
+let loader = require('./loadMessages');
+
 app.get('/', SiteController.main);
+app.get('/load', loader.load);
 
 module.exports = app;

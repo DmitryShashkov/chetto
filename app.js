@@ -40,3 +40,8 @@ if (config.server.useHTTPS) {
 let port = config.server.port;
 server.listen(port);
 winston.log(CONST.WINSTON.LEVELS.INFO, 'Listening on port ' + port);
+
+let chat = require('./server/chat');
+chat.init(server, () => {
+    console.log('Sockets init');
+});
