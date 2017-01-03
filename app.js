@@ -14,6 +14,7 @@ const fs = require('fs');
 
 const express = require('express');
 const app = express();
+const listen = require('./server/controllers/listen');
 
 app.use(compression());
 app.use(bodyParser.json());
@@ -41,7 +42,4 @@ let port = config.server.port;
 server.listen(port);
 winston.log(CONST.WINSTON.LEVELS.INFO, 'Listening on port ' + port);
 
-let chat = require('./server/chat');
-chat.init(server, () => {
-    console.log('Sockets init');
-});
+listen.init(server);

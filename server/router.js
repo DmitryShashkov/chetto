@@ -7,12 +7,15 @@ const path = require('path');
 const request = require('request');
 const app = express.Router();
 
-let SiteController = require('./controllers/site');
-let APIController = require('./controllers/api');
+const SiteController = require('./controllers/site');
 
-let loader = require('./loadMessages');
+const listen = require('./controllers/listen');
+const api = require('./controllers/api');
+
+api.init(listen.publisher, listen.subscriber);
 
 app.get('/', SiteController.main);
-app.get('/load', loader.load);
+
+app.get('/load', api.loadMessages);
 
 module.exports = app;
