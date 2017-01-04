@@ -3,14 +3,21 @@ const config = require('./../../config/config');
 const fs = require('fs');
 const path = require('path');
 
-class SiteController {
-    constructor () {}
-
-    static main (req, res, next) {
-        fs.createReadStream (
-            path.join(config.staticDir, 'index.html')
-        ).pipe(res);
-    }
+function main (req, res, next) {
+    fs.createReadStream (
+        path.join(config.staticDir, 'index.html')
+    ).pipe(res);
 }
 
-module.exports = SiteController;
+function nodeModules (req, res, next) {
+    let modulePath = req.originalUrl.replace('/node-modules/', '');
+
+    fs.createReadStream (
+        path.join('node_modules', modulePath)
+    ).pipe(res);
+}
+
+module.exports = {
+    main: main,
+    nodeModules: nodeModules
+};
