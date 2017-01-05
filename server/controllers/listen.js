@@ -41,6 +41,8 @@ function handleConnection (socket) {
     socket.on(CONST.IO.ERROR, (err) => {
         return winston.log(CONST.WINSTON.LEVELS.ERROR, err);
     });
+
+    // @todo: handle closing connection and remove entry from 'people' hash in redis
 }
 
 function init (server) {

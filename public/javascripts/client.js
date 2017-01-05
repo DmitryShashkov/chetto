@@ -16,6 +16,19 @@ function renderMessage (message) {
     ].join('');
 
     messagesElement.insertAdjacentHTML('beforeend', messageHTML);
+    scrollToBottom();
+}
+
+function renderSystemMessage (message) {
+    var messageHTML = [
+        '<li class="row">',
+            '<span class="chetto">Chetto: </span>',
+            '<span class="system">', message, '</span>',
+        '</li>'
+    ].join('');
+
+    messagesElement.insertAdjacentHTML('beforeend', messageHTML);
+    scrollToBottom();
 }
 
 function scrollToBottom () {
@@ -32,7 +45,6 @@ function loadMessages () {
                 data.forEach(function (msg) {
                     renderMessage(msg);
                 });
-                scrollToBottom();
             }
         }
     };
@@ -56,7 +68,7 @@ function onFormSubmit (event) {
     event.preventDefault();
 
     var msg = messageInput.value;
-    var noMessage = msg.match(/^[\s]*$/) !== null;
+    var noMessage = !msg.length || msg.match(/^[\s]*$/) !== null;
     var noName =
         !Cookies.get('name') ||
         Cookies.get('name').length < 1 ||
@@ -64,8 +76,7 @@ function onFormSubmit (event) {
 
     // if input is empty or white space do not send message
     if (noMessage) {
-        // tmp
-        console.log('please enter your message here');
+        return renderSystemMessage('please enter your message');
     }
 
     if (noName) {
@@ -78,12 +89,14 @@ function onFormSubmit (event) {
 
 function onMessageReceived (msg) {
     renderMessage(msg);
-    scrollToBottom();
 }
 
 function onNewVisitor (name) {
-    // tmp
-    console.log(name + ' appeared');
+    var greetingMessage = (name === Cookies.get('name'))
+        ? 'welcome to chat! we will call you ' + name
+        : name + ' joined the chat';
+
+    renderSystemMessage(greetingMessage);
 }
 
 document.addEventListener('DOMContentLoaded', function () {
