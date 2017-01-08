@@ -21,7 +21,18 @@ function loadMessages (req, res, next) {
     );
 }
 
+function loadVisitors (req, res, next) {
+    publisher.hgetall(CONST.REDIS.PEOPLE, (err, people) => {
+        if (err) {
+            return next(err);
+        }
+
+        return res.send(people);
+    });
+}
+
 module.exports = {
     init: init,
-    loadMessages: loadMessages
+    loadMessages: loadMessages,
+    loadVisitors: loadVisitors
 };

@@ -8,7 +8,10 @@
     <link rel="icon" type="image/png" href="/images/favicon.png">
 </head>
 <body>
-    <ul id="messages" class="messages-container"></ul>
+    <div class="lists-container">
+        <ul id="messages" class="messages-container"></ul>
+        <ul id="visitors" class="visitors-container"></ul>
+    </div>
 
     <form id="form" action="" class="input-form">
         <input id="message-input" autocomplete="off" class="text-input" />
@@ -18,8 +21,12 @@
     <script src="/node-modules/socket.io-client/dist/socket.io.min.js"></script>
     <script src="/node-modules/chance/dist/chance.min.js"></script>
 
+    <script src="/javascripts/app.js"></script>
     <script src="/javascripts/cookies.js"></script>
     <script src="/javascripts/formatter.js"></script>
-    <script src="/javascripts/client.js"></script>
+    <script src="/javascripts/event-handlers.js"></script>
+    <script src="/javascripts/helpers.js"></script>
+    <script src="/javascripts/load.js"></script>
+    <script src="/javascripts/render.js"></script>
 </body>
 </html>

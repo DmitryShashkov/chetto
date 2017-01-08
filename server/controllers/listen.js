@@ -42,7 +42,21 @@ function handleConnection (socket) {
         return winston.log(CONST.WINSTON.LEVELS.ERROR, err);
     });
 
-    // @todo: handle closing connection and remove entry from 'people' hash in redis
+    socket.on(CONST.IO.DISCONNECT, function() {
+        let clientID = socket.client.conn.id;
+
+        publisher.hdel(
+            CONST.REDIS.PEOPLE,
+            clientID,
+            (err, resultCode) => {
+                if (err) {
+                    return winston.log(CONST.WINSTON.LEVELS.ERROR, err);
+                }
+            }
+        );
+
+        publisher.publish(CONST.REDIS.CHAT.VISITOR_DISCONNECTED, clientID);
+    });
 }
 
 function init (server) {
@@ -64,7 +78,8 @@ function init (server) {
     Promise.all(initializers).then(() => {
         subscriber.subscribe (
             CONST.REDIS.CHAT.NEW_MESSAGE,
-            CONST.REDIS.CHAT.NEW_VISITOR
+            CONST.REDIS.CHAT.NEW_VISITOR,
+            CONST.REDIS.CHAT.VISITOR_DISCONNECTED
         );
 
         sockets = SocketIO.listen(server);

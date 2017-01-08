@@ -1,4 +1,4 @@
-var Format = (function () {
+(function (app) {
     function leadZero (number) {
         return (number < 10) ? '0' + number : number;
     }
@@ -15,6 +15,8 @@ var Format = (function () {
     }
 
     function getName () {
+        var chance = app.helpers.chance;
+
         var nameOptions = {};
         var chosenOption = chance.pickone([
             'middle', 'middle_initial', 'prefix', 'suffix'
@@ -28,8 +30,8 @@ var Format = (function () {
         ], [80, 20]);
     }
 
-    return {
-        getTime: getTime,
-        getName: getName
+    app.format =  {
+        time: getTime,
+        name: getName
     };
-})();
+})(App);
