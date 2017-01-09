@@ -8,29 +8,45 @@ let publisher = new RedisConnection();
 let subscriber = new RedisConnection('subscriber');
 let sockets;
 
-let welcomeMessage = 'Welcome to simple Redis Chat!';
-
 function handleConnection (socket) {
-    socket.emit(CONST.IO.CHAT.WELCOME, welcomeMessage);
 
-    socket.on(CONST.IO.CHAT.NAME_SET, (name) => {
-        publisher.hset(CONST.REDIS.PEOPLE, socket.client.conn.id, name);
-        publisher.publish(CONST.REDIS.CHAT.NEW_VISITOR, name);
+    socket.on(CONST.IO.CHAT.INIT, (data) => {
+        publisher.hget (
+            CONST.REDIS.PEOPLE,
+            data.sender.id,
+            (err, senderData) => {
+                if (err || !senderData) {
+                    return winston.log(CONST.WINSTON.LEVELS.ERROR, err);
+                }
+
+                let sender = JSON.parse(senderData);
+
+                sender.connectionID = socket.client.conn.id;
+
+                publisher.hset(CONST.REDIS.PEOPLE, data.sender.id, JSON.stringify(sender));
+                publisher.publish(CONST.REDIS.CHAT.NEW_VISITOR, data.name);
+            });
     });
 
     socket.on(CONST.IO.CHAT.MESSAGE, (msg) => {
         publisher.hget (
             CONST.REDIS.PEOPLE,
-            socket.client.conn.id,
-            (err, name) => {
+            msg.sender.id,
+            (err, senderData) => {
                 if (err) {
                     return winston.log(CONST.WINSTON.LEVELS.ERROR, err);
                 }
 
+                let sender = JSON.parse(senderData);
+
+                if (sender.accessToken !== msg.sender.token) {
+                    return winston.log(CONST.WINSTON.LEVELS.WARN, 'unauthorized');
+                }
+
                 let serializedMessage = JSON.stringify({
-                    m: msg.replace(/</g, '&lt').replace(/>/g, '&gt'),
+                    m: msg.text.replace(/</g, '&lt').replace(/>/g, '&gt'),
                     t: new Date().getTime(),
-                    n: name
+                    n: sender.displayName
                 });
 
                 publisher.rpush(CONST.REDIS.CHAT.MESSAGES, serializedMessage);
@@ -43,19 +59,29 @@ function handleConnection (socket) {
     });
 
     socket.on(CONST.IO.DISCONNECT, function() {
-        let clientID = socket.client.conn.id;
+        let clientConnectionID = socket.client.conn.id;
 
-        publisher.hdel(
+        publisher.hgetall(
             CONST.REDIS.PEOPLE,
-            clientID,
-            (err, resultCode) => {
-                if (err) {
+            (err, peopleData) => {
+                if (err || !peopleData) {
                     return winston.log(CONST.WINSTON.LEVELS.ERROR, err);
+                }
+
+                let clientID;
+                Object.keys(peopleData).forEach((key) => {
+                    let parsedInfo = JSON.parse(peopleData[key]);
+                    if (parsedInfo.connectionID === clientConnectionID) {
+                        clientID = key;
+                    }
+                });
+
+                if (clientID) {
+                    publisher.hdel(CONST.REDIS.PEOPLE, clientID, () => {});
+                    publisher.publish(CONST.REDIS.CHAT.VISITOR_DISCONNECTED, clientID);
                 }
             }
         );
-
-        publisher.publish(CONST.REDIS.CHAT.VISITOR_DISCONNECTED, clientID);
     });
 }
 
@@ -85,7 +111,6 @@ function init (server) {
         sockets = SocketIO.listen(server);
         sockets.on(CONST.IO.CONNECTION, handleConnection);
 
-        // channel, message
         subscriber.on(CONST.REDIS.MESSAGE, (channel, message) => {
             sockets.emit(channel, message);
         });

@@ -22,8 +22,7 @@ module.exports = {
         ERROR: 'error',
         DISCONNECT: 'disconnect',
         CHAT: {
-            WELCOME: 'io:welcome',
-            NAME_SET: 'io:name',
+            INIT: 'io:init',
             MESSAGE: 'io:message'
         }
     }

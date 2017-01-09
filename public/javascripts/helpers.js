@@ -1,14 +1,23 @@
 (function (app) {
-    var cookiesLifeExpectancy = 7;
+    function redirectToAuth() {
+        window.location.href = '/auth';
+    }
 
-    function getName () {
-        var name = app.cookies.get('name');
+    function initName () {
+        var user = app.cookies.get('user');
+        var name = app.format.user.name(user);
 
-        if (!name || name === 'null') {
-            name = app.format.name();
-            app.cookies.set('name', name, cookiesLifeExpectancy);
+        if (!name.length) {
+            return redirectToAuth();
         }
-        app.socket.emit('io:name', name);
+
+        app.socket.emit('io:init', {
+            name: name,
+            sender: {
+                id: app.format.user.id(user),
+                token: app.format.user.token(user)
+            }
+        });
 
         return name;
     }
@@ -18,7 +27,7 @@
     }
 
     app.helpers = {
-        getName: getName,
+        initName: initName,
         scrollToBottom: scrollToBottom,
         chance: window.chance
     };

@@ -5,22 +5,26 @@
         event.preventDefault();
 
         var msg = messageInput.value;
-        var noMessage = !msg.length || msg.match(/^[\s]*$/) !== null;
-        var noName =
-            !app.cookies.get('name') ||
-            app.cookies.get('name').length < 1 ||
-            app.cookies.get('name') === 'null';
+        var user = app.cookies.get('user');
 
-        // if input is empty or white space do not send message
+        var noMessage = !msg.length || msg.match(/^[\s]*$/) !== null;
+        var noName = !app.format.user.name(user).length;
+
         if (noMessage) {
             return app.render.system('please enter your message');
         }
-
         if (noName) {
             return app.helpers.getName();
         }
 
-        app.socket.emit('io:message', msg);
+        app.socket.emit('io:message', {
+            text: msg,
+            sender: {
+                id: app.format.user.id(user),
+                token: app.format.user.token(user)
+            }
+        });
+
         messageInput.value = '';
     }
 
@@ -29,11 +33,7 @@
     }
 
     function onNewVisitor (name) {
-        var greetingMessage = (name === app.cookies.get('name'))
-            ? 'welcome to chat! we will call you ' + name
-            : name + ' joined the chat';
-
-        app.render.system(greetingMessage);
+        app.render.system(name + ' joined the chat');
         app.load.visitors();
     }
 

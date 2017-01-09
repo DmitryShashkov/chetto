@@ -9,6 +9,12 @@ function main (req, res, next) {
     ).pipe(res);
 }
 
+function auth (req, res, next) {
+    fs.createReadStream (
+        path.join(config.staticDir, 'auth.html')
+    ).pipe(res);
+}
+
 function nodeModules (req, res, next) {
     let modulePath = req.originalUrl.replace('/node-modules/', '');
 
@@ -19,5 +25,6 @@ function nodeModules (req, res, next) {
 
 module.exports = {
     main: main,
+    auth: auth,
     nodeModules: nodeModules
 };

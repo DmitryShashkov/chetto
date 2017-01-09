@@ -15,12 +15,14 @@ const fs = require('fs');
 const express = require('express');
 const app = express();
 const listen = require('./server/controllers/listen');
+const auth = require('./server/controllers/auth');
 
 app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, config.staticDir)));
+app.use(auth.initialize());
 app.use(router);
 
 let server;

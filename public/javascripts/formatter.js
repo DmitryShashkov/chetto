@@ -14,24 +14,38 @@
         return String(h) + ':' + m + ':' + s;
     }
 
-    function getName () {
-        var chance = app.helpers.chance;
+    function getUserName (user) {
+        try {
+            var parsedData = JSON.parse(user);
+            return parsedData.displayName || parsedData.userData.displayName;
+        } catch (exc) {
+            return '';
+        }
+    }
 
-        var nameOptions = {};
-        var chosenOption = chance.pickone([
-            'middle', 'middle_initial', 'prefix', 'suffix'
-        ]);
+    function getUserToken (user) {
+        try {
+            var parsedData = JSON.parse(user);
+            return parsedData.accessToken || parsedData.userData.accessToken;
+        } catch (exc) {
+            return '';
+        }
+    }
 
-        nameOptions[chosenOption] = true;
-
-        return chance.weighted([
-            chance.name(),
-            chance.name(nameOptions)
-        ], [80, 20]);
+    function getUserID (user) {
+        try {
+            return JSON.parse(user).id;
+        } catch (exc) {
+            return '';
+        }
     }
 
     app.format =  {
         time: getTime,
-        name: getName
+        user: {
+            name: getUserName,
+            token: getUserToken,
+            id: getUserID
+        }
     };
 })(App);

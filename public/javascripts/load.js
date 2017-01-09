@@ -21,12 +21,14 @@
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    var data = JSON.parse(xhr.responseText);
-                    var names = Object.keys(data).map(function (key) {
-                        return data[key];
-                    });
+                    try {
+                        var data = JSON.parse(xhr.responseText);
+                        var names = Object.keys(data).map(function (key) {
+                            return app.format.user.name(data[key]);
+                        });
 
-                    app.render.visitors(names);
+                        app.render.visitors(names);
+                    } catch (exc) {}
                 }
             }
         };
