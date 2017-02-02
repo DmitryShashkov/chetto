@@ -1,5 +1,7 @@
 .idea/*
 npm-debug.log
 node_modules/*
-config/config.js
+config/config-data
+chetto
+chetto.pub
 public/images/*

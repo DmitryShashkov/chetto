@@ -25,22 +25,10 @@ app.use(express.static(path.join(__dirname, config.staticDir)));
 app.use(auth.initialize());
 app.use(router);
 
-let server;
-if (config.server.useHTTPS) {
-    let credentials = {
-        key: fs.readFileSync(config.certificates.key),
-        cert: fs.readFileSync(config.certificates.crt),
-        ca: config.certificates.ca.map(file => fs.readFileSync(file))
-    };
-
-    winston.log(CONST.WINSTON.LEVELS.INFO, 'Using HTTPS');
-    server = https.createServer(credentials, app);
-} else {
-    winston.log(CONST.WINSTON.LEVELS.INFO, 'Using HTTP');
-    server = http.createServer(app);
-}
-
+winston.log(CONST.WINSTON.LEVELS.INFO, 'Using HTTP');
+let server = http.createServer(app);
 let port = config.server.port;
+
 server.listen(port);
 winston.log(CONST.WINSTON.LEVELS.INFO, 'Listening on port ' + port);
 
